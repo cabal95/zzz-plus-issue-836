@@ -3,7 +3,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Runtime.Serialization;
+
+using Z.EntityFramework.Plus;
 
 namespace ErrorSample
 {
@@ -37,7 +40,7 @@ namespace ErrorSample
 
             using (var context = new DataContext())
             {
-                var groupsQry = context.Set<Group>().Where( g => g.Id == 0 );
+                var groupsQry = context.Set<Group>().Where( g => g.Id == 1 );
                 var groups = groupsQry.ToList();
             }
         }
@@ -48,6 +51,7 @@ namespace ErrorSample
         public DataContext()
             : base( "Data Source=localhost; Initial Catalog=error-sample; User Id=ErrorUser; Password=ErrorPass; MultipleActiveResultSets=true" )
         {
+            QueryFilterManager.InitilizeGlobalFilter( this );
         }
 
         protected override void OnModelCreating( DbModelBuilder modelBuilder )
@@ -94,8 +98,8 @@ namespace ErrorSample
         {
             this.HasRequired( p => p.Group ).WithMany( p => p.Members ).HasForeignKey( p => p.GroupId ).WillCascadeOnDelete( true );
 
-            Z.EntityFramework.Plus.QueryFilterManager.Filter<GroupMember>( x => x.Where( m => m.IsArchived == false ) );
-            Z.EntityFramework.Plus.QueryFilterManager.AllowPropertyFilter = false;
+            QueryFilterManager.Filter<GroupMember>( x => x.Where( m => m.IsArchived == false ) );
+            QueryFilterManager.AllowPropertyFilter = false;
         }
     }
 
@@ -103,8 +107,8 @@ namespace ErrorSample
     {
         public GroupConfiguration()
         {
-            Z.EntityFramework.Plus.QueryFilterManager.Filter<Group>( x => x.Where( g => g.IsArchived == false ) );
-            Z.EntityFramework.Plus.QueryFilterManager.AllowPropertyFilter = false;
+            QueryFilterManager.Filter<Group>( x => x.Where( g => g.IsArchived == false ) );
+            QueryFilterManager.AllowPropertyFilter = false;
         }
     }
 }
